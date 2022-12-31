@@ -95,7 +95,6 @@ onMounted(() => {
   listaNumeros.value = listaNumsM || []
 })
 
-
 // [
 //   {numeros: ['01', '12', '23', '35', '38', '51', '54'], vencedor: false, jogador: 'Thaís itaú'},
 //   {numeros: ['06','15','26','34','51','54','57'], vencedor: false, jogador: 'Thaís itaú'},
