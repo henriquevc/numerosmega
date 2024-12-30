@@ -1,4 +1,7 @@
 <template>
+  <div class="row justify-end q-pa-md">
+    <q-btn icon="brightness_6" flat round  @click="trocarCor()"/>
+  </div>
   <h3 class="text-center">Números da mega</h3>
   <div class="row justify-center q-col-gutter-md">
     <div class="col-xs-12 col-lg-10 row q-col-gutter-sm justify-between">
@@ -16,17 +19,6 @@
       <span class="text-h5">Jogos cadastrados</span>
       <q-btn color="positive" icon="add" @click="showNovoJogo = true">adicionar jogo</q-btn>
     </div>
-    <!-- <div class="col-xs-12 col-lg-10 row items-center justify-between">
-      <div v-for="(item, index) in listaNumeros" :key="index" class="col-xs-9 col-sm-8 col-md-6 col-lg-4 col-xl-3 q-py-md q-px-lg row items-center" style="border: 1px solid rgba(0,0,0,.12)">
-        <div class="q-pa-sm q-col-2">
-          <q-chip v-if="item.vencedor" size="sm" class="text-white bg-positive">Ganhador</q-chip>
-          <q-chip v-else  size="sm" class="text-white bg-negative">Não venceu</q-chip>
-        </div>
-        <div class="row q-col-10 q-col-gutter-x-md">
-          <div class="col-2 text-bold text-body1" v-for="num in item.numeros" :key="num">{{ num }}</div>
-        </div>
-      </div>
-    </div> -->
     <q-dialog v-model="showNovoJogo">
       <q-card>
         <q-card-section class="row items-center q-pb-none">
@@ -38,7 +30,7 @@
         <q-card-section>
           <div class="row items-center justify-center q-col-gutter-sm">
             <q-input v-model="novoJogo.nome" outlined label="Nome" class="q-my-md col-12"></q-input>
-            <q-input v-for="n in 10" v-model="novoJogo.numeros[n]" type="number" :key="n" outlined :label="`${n}ª dezena ${n <= 6 ? '(obrigatório)' : ''}`" maxlength="2" class="col-4"></q-input>
+            <q-input v-for="n in 12" v-model="novoJogo.numeros[n]" type="number" :key="n" outlined :label="`${n}ª dezena ${n <= 6 ? '(obrigatório)' : ''}`" maxlength="2" class="col-4"></q-input>
           </div>
         </q-card-section>
 
@@ -48,7 +40,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <q-list bordered separator class="col-xs-12 col-sm-10 col-md-9 col-lg-6 col-xl-4 q-my-lg" style="max-width: 560px">
+    <q-list bordered v-if="listaNumeros && listaNumeros.length" separator class="col-xs-12 col-sm-10 col-md-9 col-lg-6 col-xl-4 q-my-lg" style="max-width: 560px">
       <q-item v-for="(item, index) in listaNumeros" :key="index" class="q-col-4" bordered>
         <q-item-section side>
           {{item.jogador}} - #{{ index + 1 }}
@@ -74,6 +66,11 @@
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 const $q = useQuasar()
+
+$q.dark.set('auto')
+function trocarCor () {
+  $q.dark.toggle()
+}
 
 const showNovoJogo = ref(false)
 const novoJogo = ref({
@@ -116,8 +113,9 @@ function adicionarJogo () {
   if (novoJogo.value.numeros.length < 6) {
     return
   }
+  console.log(novoJogo.value.numeros)
   listaNumeros.value.push({
-    numeros: novoJogo.value.numeros.filter(n => n),
+    numeros: novoJogo.value.numeros.filter(n => n).map(n => pad(n)),
     vencedor: false,
     jogador: novoJogo.value.nome
   })
@@ -141,10 +139,8 @@ function comparar () {
   for (let key in sorteado.value) {
     sorteado.value[key] = pad(sorteado.value[key])
   }
-  for (let i = 0; i < listaNumeros.value.length; i++) {
-
-  }
   listaNumeros.value.forEach(item => {
+    console.log(item, sorteado.value.primeiro)
     if (
         item.numeros.includes(sorteado.value.primeiro) &&
         item.numeros.includes(sorteado.value.segundo) &&
