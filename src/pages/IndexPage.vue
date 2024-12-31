@@ -30,13 +30,17 @@
         <q-card-section>
           <div class="row items-center justify-center q-col-gutter-sm">
             <q-input v-model="novoJogo.nome" outlined label="Nome" class="q-my-md col-12"></q-input>
-            <q-input v-for="n in 12" v-model="novoJogo.numeros[n]" type="number" :key="n" outlined :label="`${n}ª dezena ${n <= 6 ? '(obrigatório)' : ''}`" maxlength="2" class="col-4"></q-input>
+            <q-input v-for="n in 15" v-model="novoJogo.numeros[n]"
+              type="text" :key="n" outlined class="col-4"
+              inputmode="numeric" maxlength="2"
+              :rules="[ val => (val>= 1 && val <= 60) || 'Números entre 1 e 60']"
+              :label="`${n}ª dezena ${n <= 6 ? '(obrigatório)' : ''}`"></q-input>
           </div>
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions align="right" style="position: sticky; bottom: 0;" :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
           <q-btn flat label="cancelar" v-close-popup />
-          <q-btn color="positive" label="adicionar" @click="adicionarJogo" v-close-popup />
+          <q-btn color="positive" label="adicionar" @click="adicionarJogo" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -92,28 +96,14 @@ onMounted(() => {
   listaNumeros.value = listaNumsM || []
 })
 
-// [
-//   {numeros: ['01', '12', '23', '35', '38', '51', '54'], vencedor: false, jogador: 'Thaís itaú'},
-//   {numeros: ['06','15','26','34','51','54','57'], vencedor: false, jogador: 'Thaís itaú'},
-//   {numeros: ['03','23','28','35','39','52','57'], vencedor: false, jogador: 'Thaís itaú'},
-//   {numeros: ['09','14','31','36','39','45','54'], vencedor: false, jogador: 'Thaís itaú'},
-//   {numeros: ['02','23','37','42','46','59','54'], vencedor: false, jogador: 'Thaís itaú'},
-//   {numeros: ['04','12','18','23','34','46','55'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['09','18','21','39','45','48','52'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['04','23','31','35','47','51','55'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['03','23','27','41','49','55','57'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['02','18','25','41','44','49','56'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['09','15','18','20','24','27','40','47'], vencedor: false, jogador: 'Izaura'},
-//   {numeros: ['03','12','21','36','39','50','56','58'], vencedor: false, jogador: 'Izaura'},
-// ]
-
-
-
 function adicionarJogo () {
   if (novoJogo.value.numeros.length < 6) {
     return
   }
-  console.log(novoJogo.value.numeros)
+  if (novoJogo.value.numeros.some(n => n < 1 || n > 60)) {
+    return
+  }
+
   listaNumeros.value.push({
     numeros: novoJogo.value.numeros.filter(n => n).map(n => pad(n)),
     vencedor: false,
@@ -123,8 +113,8 @@ function adicionarJogo () {
   novoJogo.value = {
     numeros: []
   }
-
   window.localStorage.setItem('listaNumeros', JSON.stringify(listaNumeros.value))
+  showNovoJogo.value = false
 }
 
 function removeItem (index) {
@@ -137,10 +127,12 @@ function comparar () {
     item.vencedor = false
   })
   for (let key in sorteado.value) {
+    if (!sorteado.value[key]) {
+      return
+    }
     sorteado.value[key] = pad(sorteado.value[key])
   }
   listaNumeros.value.forEach(item => {
-    console.log(item, sorteado.value.primeiro)
     if (
         item.numeros.includes(sorteado.value.primeiro) &&
         item.numeros.includes(sorteado.value.segundo) &&
